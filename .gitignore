@@ -1,0 +1,25 @@
+# ---------------- Python ----------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.eggs/
+
+# ---------------- 模型训练产物 ----------------
+checkpoints/      # 模型权重（.pt 文件较大，需要共享时单独处理）
+runs/             # TensorBoard 日志（可重新生成）
+
+# ---------------- Hugging Face 数据缓存 ----------------
+hf_cache/
+
+# ---------------- IDE ----------------
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ---------------- 系统 ----------------
+.DS_Store
+Thumbs.db
+desktop.ini

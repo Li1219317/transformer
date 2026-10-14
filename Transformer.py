@@ -11,7 +11,7 @@ class SelfAttention(nn.Module):
         self.dropout = nn.Dropout(dropout)#定义成员变量，成员里的dropout就是torch.nn库里的，参数用定义的0.1
         self.softmax = nn.Softmax(dim=-1)#Softmax 把一组实数变成概率分布（每个值在 0~1 之间，且总和为 1）：
     def forward(self, Q, K, V,mask=None):#定义前向传播函数，传入的参数是经过变换的KQV矩阵，掩码默认不开启
-        d_k = Q.size()[-1]#确定参数的维度，就是一个token被转换成的参数向量里有几个参数，最开始是512个
+        d_k = Q.size()[-1]#确定参数的    维度，就是一个token被转换成的参数向量里有几个参数，最开始是512个
         scores = torch.matmul(Q, K.transpose(-1, -2)) / math.sqrt(d_k)#计算自己和其他词汇的相关性，询问是Q，关键词是K，K进行转置之后才能相乘
         if mask is not None:
             scores = scores.masked_fill(mask == 0, -1e9)
@@ -79,7 +79,7 @@ class FeedForward(nn.Module):
         out = self.fc2(out)        # 降回 d_model
         return out                 #  只做纯变换，不加残差、不做 Norm
 
-class EncoderLayer(nn.Module):
+class EncoderLayer(nn.Module):#这一部分是编码器
     def __init__(self, d_model, d_ff, num_heads, dropout=0.2):
         super(EncoderLayer, self).__init__()
         self.attention = MultiHeadAttention(d_model, num_heads, dropout)
@@ -128,13 +128,13 @@ class DecoderLayer(nn.Module):
         out = self.norm3(tgt + self.dropout(self.feedforward(tgt)))
 
         return out
-
+#我预先算好了一堆位置的编码，现在输入了多少个 token（seq_len），就从里面取前 seq_len 个；这些位置编码通过广播复制到 batch 里每一句话上，再和我每个 token 的向量逐元素相加，把位置信息注入进去。
 class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, max_len=5000, dropout=0.2):
+    def __init__(self, d_model, max_len=5000, dropout=0.1):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(dropout)
 
-        pe = torch.zeros(max_len, d_model)
+        pe = torch.zeros(max_len, d_model) #创建了一张位置编码的词表，先全都填0，大小是5000*512， 随便定的token数目和对应一个    token 的参数两
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)  # [max_len, 1]
         div_term = torch.exp(
             torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
@@ -147,9 +147,9 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe', pe)                  # 不参与训练，但随模型保存
 
     def forward(self, x):
-        seq_len = x.size(1)
-        x = x + self.pe[:, :seq_len, :]                 # 广播相加
-        return self.dropout(x)
+        seq_len = x.size(1)#先取出我的向量有几个token
+        x = x + self.pe[:, :seq_len, :]            #之后将向量和位置词表的对应元素     # 广播相加
+        return self.dropout(x)          #随机失活
 
 
 class Encoder(nn.Module):

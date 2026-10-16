@@ -19,7 +19,7 @@ os.environ["HF_HOME"] = os.path.join(_script_dir, "hf_cache")
 from Transformer import Transformer
 from config import ModelConfig, InferConfig, PAD_IDX, BOS_IDX, EOS_IDX
 from tokenizer import Vocab, tokenize
-from train import make_src_mask, make_tgt_mask
+from utils import make_src_mask, make_tgt_mask
 
 
 def load_model(ckpt_path, device):
